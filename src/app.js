@@ -2,46 +2,29 @@ const express = require('express');
 
 const app = express();
 
-// We can also handle route handlers in this way.
-app.get('/user', (req, res, next) => {
-    next();
-});
-
-app.get('/user', (req, res) => {
-    res.send("Hello World!");
+// Suppose you got error in your functions, then if you don't handle it, it will give error in the way, that the user or client will not understand and also it will expose many other things.
+// Also, it will stop the server from running.
+// That's why always use try-catch block to handle the errors.
+app.get('/getUserData', (req, res) => {
+    throw new Error("Error in getUserData route");
+    res.send('User data');
 })
 
-// But why we require so many functions to handle a single route?
-// Because we have to many tasks in a single route, so we have to break it down into multiple functions.
-// This makes the code more readable and maintainable.
+// Also, we can handle errors using error handling middleware.
+// This middleware will catch all the errors that are thrown in the application.
+// It will catch the error and send the response to the client.
 
-// The last function in the chain is the one that sends the response to the client is called as request handler.
-// And all the middle functins are called as middlewares.
+// We get another argument in the route handler function other than req, res and next that is err.
+// That is used to catch the error.
 
-// Now suppose, you have multiple routes, and you want that only authenticated users can access those routes.
-// So, you have to write the authentication code in every route handler.
-// This will make the code redundant and difficult to maintain.
-// So, we can use middlewares to solve this problem.
-
-// Now, how to use middlewares in our application?
-// Suppose, we want that only admin can access the /admin route.
-
-app.use('/admin', (req, res, next) => {
-    const token = "xyz";
-    const authenticated = token === 'xyz';
-    if (authenticated) {
-        next();
-    } else {
-        res.status(401).send("Unauthorized");
+// Express makes these arguments are very dynamic.
+// If we pass 2 arguments in the route handler function, then it will consider the first argument as req and the second argument as res.
+// If we pass 3 arguments, then it will consider the first argument as req, the second argument as res and the third argument as next.
+// If we pass 4 arguments, then it will consider the first argument as err, the second argument as req, the third argument as res and the fourth argument as next.
+app.use("/", (err, req, res, next) => {
+    if(err){
+        res.status(500).send("Something went wrong");
     }
-});
-
-app.get('/admin/getAllData', (req, res) => {
-    res.send("Admin got all data!");
-});
-
-app.post('/admin/createData', (req, res) => {
-    res.send("Admin created something!");
 });
 
 app.listen(3000, () => {
