@@ -2,76 +2,47 @@ const express = require('express');
 
 const app = express();
 
-app.use('/user', (req, res) => {
-    // What if we don't send anything back?
-    // Then the request will hang until it times out.
+// We can also handle route handlers in this way.
+app.get('/user', (req, res, next) => {
+    next();
+});
+
+app.get('/user', (req, res) => {
+    res.send("Hello World!");
 })
 
-// What will happen in the below code?
-// It will give use 'Response 1' as output.
-// Because the first request handler handles the request and sends the response.
-app.use('/user',
-    (req, res) => {
-        res.send("Response 1");
-    },
-    (req, res) => {
-        res.send("Response 2");
-    }
-)
+// But why we require so many functions to handle a single route?
+// Because we have to many tasks in a single route, so we have to break it down into multiple functions.
+// This makes the code more readable and maintainable.
 
-// So, to pass the request to the next handler, we need to call next() function.
-// We get a third argument in the request handler function which is next.
-app.use('/user',
-    (req, res, next) => {
-        // What if we don't send anything back?
-        // Then the request will hang until it times out.
+// The last function in the chain is the one that sends the response to the client is called as request handler.
+// And all the middle functins are called as middlewares.
 
-        // res.send("Response 1");
+// Now suppose, you have multiple routes, and you want that only authenticated users can access those routes.
+// So, you have to write the authentication code in every route handler.
+// This will make the code redundant and difficult to maintain.
+// So, we can use middlewares to solve this problem.
+
+// Now, how to use middlewares in our application?
+// Suppose, we want that only admin can access the /admin route.
+
+app.use('/admin', (req, res, next) => {
+    const token = "xyz";
+    const authenticated = token === 'xyz';
+    if (authenticated) {
         next();
-    },
-    (req, res) => {
-        res.send("Response 2");
+    } else {
+        res.status(401).send("Unauthorized");
     }
-)
+});
 
-// What happens if we send the respons from the first request handler and then also call next()?
-// We will get an error saying 'Cannot set headers after they are sent to the client'.
-app.use('/user',
-    (req, res, next) => {
-        // What if we don't send anything back?
-        // Then the request will hang until it times out.
+app.get('/admin/getAllData', (req, res) => {
+    res.send("Admin got all data!");
+});
 
-        res.send("Response 1");
-        next();
-    },
-    (req, res) => {
-        res.send("Response 2");
-    }
-)
-
-// What happens if we called next() but there is no request handler?
-// We will get an error saying 'Cannot GET /user'.
-app.use('/user',
-    (req, res, next) => {
-        // What if we don't send anything back?
-        // Then the request will hang until it times out.
-
-        // res.send("Response 1");
-        next();
-    },
-    (req, res) => {
-        // res.send("Response 2");
-        next();
-    }
-)
-
-// We can also give array of route handlers.
-app.use('/user', [rh1, rh2, rh3]);
-
-// OR
-
-// We can also do this way.
-app.use('/user', [rh1, rh2], rh3);
+app.post('/admin/createData', (req, res) => {
+    res.send("Admin created something!");
+});
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
