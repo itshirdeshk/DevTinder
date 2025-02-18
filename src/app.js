@@ -2,51 +2,76 @@ const express = require('express');
 
 const app = express();
 
-// This routes makes the letter 'b' optional in the URL
-// So, both /ac and /abc will work
-app.get('/ab?c', (req, res) => {
-    res.send('ab?c');
+app.use('/user', (req, res) => {
+    // What if we don't send anything back?
+    // Then the request will hang until it times out.
 })
 
-// Here, bc becomes optional.
-app.get('/a(bc)?d', (req, res) => {
-    res.send('ab?c');
-})
+// What will happen in the below code?
+// It will give use 'Response 1' as output.
+// Because the first request handler handles the request and sends the response.
+app.use('/user',
+    (req, res) => {
+        res.send("Response 1");
+    },
+    (req, res) => {
+        res.send("Response 2");
+    }
+)
 
-// So, by using '+', we can make the letter 'b' repeatable
-app.get('/ab+c', (req, res) => {
-    res.send('ab?c');
-})
+// So, to pass the request to the next handler, we need to call next() function.
+// We get a third argument in the request handler function which is next.
+app.use('/user',
+    (req, res, next) => {
+        // What if we don't send anything back?
+        // Then the request will hang until it times out.
 
-// So, here '*' denotes that anything can come on its place as long as it starts with 'ab' and ends with 'c'
-app.get('/ab*c', (req, res) => {
-    res.send('ab?c');
-})
+        // res.send("Response 1");
+        next();
+    },
+    (req, res) => {
+        res.send("Response 2");
+    }
+)
 
-// We can also write regex instead of the string
-// Here, the URL should contain 'a' and anything can come anywhere
-app.get(/a/, (req, res) => {
-    res.send('a');
-})
+// What happens if we send the respons from the first request handler and then also call next()?
+// We will get an error saying 'Cannot set headers after they are sent to the client'.
+app.use('/user',
+    (req, res, next) => {
+        // What if we don't send anything back?
+        // Then the request will hang until it times out.
 
-// Here, the URL should contain 'fly' at the end
-app.get(/.*fly$/, (req, res) => {
-    res.send('a');
-})
+        res.send("Response 1");
+        next();
+    },
+    (req, res) => {
+        res.send("Response 2");
+    }
+)
 
-// Dynamic Routing
-app.get('/users/:userId', (req, res) => {
-    res.send(req.params);
-})
+// What happens if we called next() but there is no request handler?
+// We will get an error saying 'Cannot GET /user'.
+app.use('/user',
+    (req, res, next) => {
+        // What if we don't send anything back?
+        // Then the request will hang until it times out.
 
-app.get('/users/:userId/:bookId', (req, res) => {
-    res.send(req.params);
-})
+        // res.send("Response 1");
+        next();
+    },
+    (req, res) => {
+        // res.send("Response 2");
+        next();
+    }
+)
 
-// Quuery Params
-app.get('/users', (req, res) => {
-    res.send(req.query);
-})
+// We can also give array of route handlers.
+app.use('/user', [rh1, rh2, rh3]);
+
+// OR
+
+// We can also do this way.
+app.use('/user', [rh1, rh2], rh3);
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
