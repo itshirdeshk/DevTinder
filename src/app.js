@@ -2,22 +2,51 @@ const express = require('express');
 
 const app = express();
 
-// This will only handle GET requests to the /user route.
-app.get('/user', (req, res) => {
-    res.send({
-        firstName: "Hirdesh",
-        lastName: "Khandelwal"
-    });
-});
+// This routes makes the letter 'b' optional in the URL
+// So, both /ac and /abc will work
+app.get('/ab?c', (req, res) => {
+    res.send('ab?c');
+})
 
-app.post('/user', (req, res) => {
-    res.send("Data successfully saved to the DB");
-});
+// Here, bc becomes optional.
+app.get('/a(bc)?d', (req, res) => {
+    res.send('ab?c');
+})
 
-// This will handle all requests to the /user route.
-app.use('/test', (req, res) => {
-    res.send("Hello from Test");
-});
+// So, by using '+', we can make the letter 'b' repeatable
+app.get('/ab+c', (req, res) => {
+    res.send('ab?c');
+})
+
+// So, here '*' denotes that anything can come on its place as long as it starts with 'ab' and ends with 'c'
+app.get('/ab*c', (req, res) => {
+    res.send('ab?c');
+})
+
+// We can also write regex instead of the string
+// Here, the URL should contain 'a' and anything can come anywhere
+app.get(/a/, (req, res) => {
+    res.send('a');
+})
+
+// Here, the URL should contain 'fly' at the end
+app.get(/.*fly$/, (req, res) => {
+    res.send('a');
+})
+
+// Dynamic Routing
+app.get('/users/:userId', (req, res) => {
+    res.send(req.params);
+})
+
+app.get('/users/:userId/:bookId', (req, res) => {
+    res.send(req.params);
+})
+
+// Quuery Params
+app.get('/users', (req, res) => {
+    res.send(req.query);
+})
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
