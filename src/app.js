@@ -4,25 +4,49 @@ const User = require('./models/user');
 
 const app = express();
 
+// Now, we apply our middleware here.
+app.use(express.json());
+
 app.post('signup', async (req, res) => {
-    const userObj = {
-        firstName: "Hirdesh",
-        lastName: "Khandelwal",
-        emailId: "hirdeshkhandelwal58@gmail.com",
-        password: "hirdesh@123"
-    }
-    // Now, we have to save the data in the db.
-    // For that, we have to import the User model.
-    // Then, we have to create a new instance of the user model.
+    // Now, we will see how we can data from the user.
+    // So, for getting the data, user have to send the data in the body of the request.
+    // But we can't get the data directly from the body of the request.
+    // Because it is in the JSON format.
+
+    // So, we require to use a middleware or a package which can parse the JSON data.
+    // We generally use a package that itself provided by the express that is express.json().
 
     try {
-        const user = new User(userObj);
+        const user = new User(req.body);
         // Now, we have to save the user in the db.
         await user.save();
 
         res.send("User created successfully");
     } catch (error) {
         res.status(400).send("Error while creating user");
+    }
+
+})
+
+// Get user by emailId - GET /user
+app.get('/user', async (req, res) => {
+    try {
+        const user = await User.findOne({ emailId: req.body.emailId });
+        if (!user) res.send("User not found");
+
+        res.send(user);
+    } catch (error) {
+        res.status(404).send("Error while getting user");
+    }
+})
+
+// Feed API - GET /feed - get all the users from the database.
+app.get('/feed', async (req, res) => {
+    try {
+        const users = await User.find();
+        res.send(users);
+    } catch (error) {
+        res.status(404).send("Error while getting users");
     }
 })
 
