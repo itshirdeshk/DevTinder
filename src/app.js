@@ -46,7 +46,36 @@ app.get('/feed', async (req, res) => {
         const users = await User.find();
         res.send(users);
     } catch (error) {
-        res.status(404).send("Error while getting users");
+        res.status(400).send("Error while getting users");
+    }
+})
+
+// Delete API - DELETE /user - delete the user by ID.
+app.delete('/user', async (req, res) => {
+    const userId = req.body.userId;
+    try {
+        // There are two ways to pass the id of the user.
+        // First one in which we pass the id directly in the function.
+        const user = await User.findByIdAndDelete(userId);
+
+        // Second one in which we pass the id in the object.
+        // const user  = await User.findByIdAndDelete({_id: userId});
+
+        res.send("User deleted successfully");
+    } catch (error) {
+        res.status(400).send("Error while deleting user");
+    }
+})
+
+// Update the user by ID
+app.patch('/user', async (req, res) => {
+    const userId = req.body.userId;
+    const updateData = req.body;
+    try {
+        const user = await User.findByIdAndUpdate(userId, updateData);
+        res.send("User updated successfully");
+    } catch (err) {
+        res.status(400).send("Error while updating user");
     }
 })
 
