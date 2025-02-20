@@ -59,7 +59,7 @@ app.delete('/user', async (req, res) => {
         const user = await User.findByIdAndDelete(userId);
 
         // Second one in which we pass the id in the object.
-        // const user  = await User.findByIdAndDelete({_id: userId});
+        // const user = await User.findByIdAndDelete({_id: userId});
 
         res.send("User deleted successfully");
     } catch (error) {
@@ -71,7 +71,21 @@ app.delete('/user', async (req, res) => {
 app.patch('/user', async (req, res) => {
     const userId = req.body.userId;
     const updateData = req.body;
+
     try {
+        const ALLOWED_UPDATES = [
+            "profilePhoto", "about", "gender", "age", "skills"
+        ]
+
+        const isUpdateAllowed = Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k));
+        if (!isUpdateAllowed) {
+            res.status(400).send("Update is not allowed");
+        }
+
+        if(updateData?.skills?.length > 5){
+            res.status(400).send("Skills should be less than or equal to 6");
+        }
+
         const user = await User.findByIdAndUpdate(userId, updateData);
         res.send("User updated successfully");
     } catch (err) {
