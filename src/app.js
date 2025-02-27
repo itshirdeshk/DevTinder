@@ -1,13 +1,15 @@
 const express = require('express');
 const { connectDB } = require('./config/database');
 const User = require('./models/user');
+const { validateSignUpData } = require('../utils/validation');
+const bcrypt = require('bcrypt');
 
 const app = express();
 
 // Now, we apply our middleware here.
 app.use(express.json());
 
-app.post('signup', async (req, res) => {
+app.post('/signup', async (req, res) => {
     // Now, we will see how we can data from the user.
     // So, for getting the data, user have to send the data in the body of the request.
     // But we can't get the data directly from the body of the request.
@@ -16,16 +18,55 @@ app.post('signup', async (req, res) => {
     // So, we require to use a middleware or a package which can parse the JSON data.
     // We generally use a package that itself provided by the express that is express.json().
 
+    // There are many remaining things that we have to do.
+
+    // We have to validate the data.
+    // Then, we have to encrypt the password.
+
+    
     try {
-        const user = new User(req.body);
+        // We have to validate the data.
+        validateSignUpData(req);
+
+        // Then, we have to encrypt the password.
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+
+        const user = new User({
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            emailId: req.body.emailId,
+            password: hashedPassword
+        });
         // Now, we have to save the user in the db.
         await user.save();
 
         res.send("User created successfully");
     } catch (error) {
-        res.status(400).send("Error while creating user");
+        res.status(400).send("Error:", error.message);
     }
+})
 
+app.post('/login', async (req, res) => {
+    try {
+        const {emailId, password} = req.body;
+
+        const user = await User.findOne({ emailId });
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if(!isPasswordValid){
+            throw new Error("Password is incorrect");
+        }
+
+        res.send("User logged in successfully");
+    } catch (error) {
+        res.status(400).send("Error:", error.message);
+    }
 })
 
 // Get user by emailId - GET /user
@@ -82,7 +123,7 @@ app.patch('/user', async (req, res) => {
             res.status(400).send("Update is not allowed");
         }
 
-        if(updateData?.skills?.length > 5){
+        if (updateData?.skills?.length > 5) {
             res.status(400).send("Skills should be less than or equal to 6");
         }
 
