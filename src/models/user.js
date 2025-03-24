@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const userSchema = mongoose.Schema({
     firstName: {
@@ -15,8 +17,8 @@ const userSchema = mongoose.Schema({
         unique: true,
         trim: true,
         lowercase: true,
-        validate(value){
-            if(!validator.isEmail(value)){
+        validate(value) {
+            if (!validator.isEmail(value)) {
                 res.status(400).send("Provided email is not a valid email.")
             }
         }
@@ -33,8 +35,8 @@ const userSchema = mongoose.Schema({
         type: String,
         // These validators don't run for the update function directly.
         // To run for update too then we have to make the runValidator option true.
-        validate(value){
-            if(!['male', 'female', 'others'].includes(value)){
+        validate(value) {
+            if (!['male', 'female', 'others'].includes(value)) {
                 throw new Error("Gender data is not valid")
             }
         }
@@ -54,7 +56,25 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "This is the default about of every user."
     }
-}, {timestamps: true})
+}, { timestamps: true })
+
+userSchema.methods.getJWT = async function () {
+    const user = this;
+
+    const token = jwt.sign({ _id: user._id }, "dev@tinder", { expiresIn: "1d" });
+
+    return token;
+}
+
+userSchema.methods.validatePassword = async function(password){
+    const user = this;
+
+    const passwordHash = user.password;
+
+    const isPasswordValid = await bcrypt.compare(password, passwordHash);
+
+    return isPasswordValid;
+}
 
 const User = mongoose.model('User', userSchema);
 
