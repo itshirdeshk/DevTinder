@@ -41,7 +41,7 @@ const userSchema = mongoose.Schema({
             }
         }
     },
-    profilePhoto: {
+    photoUrl: {
         type: String,
         validate(value) {
             if (!validator.isURL(value)) {
