@@ -13,11 +13,13 @@ const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
 const requestRouter = require('./routes/request');
 const profileRouter = require('./routes/profile');
+const paymentRouter = require('./routes/payment');
 
 app.use('/auth', authRouter);
 app.use('/request', requestRouter);
 app.use('/user', userRouter);
 app.use('/profile', profileRouter);
+app.use('/payment', paymentRouter);
 
 // Get user by emailId - GET /user
 app.get('/user', async (req, res) => {

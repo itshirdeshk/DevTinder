@@ -55,7 +55,14 @@ const userSchema = mongoose.Schema({
     about: {
         type: String,
         default: "This is the default about of every user."
-    }
+    },
+    isPremium: {
+        type: Boolean,
+        default: false
+    },
+    membershipType: {
+        type: String
+    },
 }, { timestamps: true })
 
 userSchema.methods.getJWT = async function () {
@@ -66,7 +73,7 @@ userSchema.methods.getJWT = async function () {
     return token;
 }
 
-userSchema.methods.validatePassword = async function(password){
+userSchema.methods.validatePassword = async function (password) {
     const user = this;
 
     const passwordHash = user.password;
