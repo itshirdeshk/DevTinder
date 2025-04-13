@@ -11,8 +11,13 @@ app.use(cookieParser());
 
 const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
+const requestRouter = require('./routes/request');
+const profileRouter = require('./routes/profile');
 
 app.use('/auth', authRouter);
+app.use('/request', requestRouter);
+app.use('/user', userRouter);
+app.use('/profile', profileRouter);
 
 // Get user by emailId - GET /user
 app.get('/user', async (req, res) => {
