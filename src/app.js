@@ -2,8 +2,14 @@ const express = require('express');
 const { connectDB } = require('./config/database');
 const User = require('./models/user');
 const cookieParser = require('cookie-parser');
+const http = require('http');
+const intializeSocket = require('./utils/socket');
 
 const app = express();
+
+const server = http.createServer(app);
+
+intializeSocket(server);
 
 // Now, we apply our middleware here.
 app.use(express.json());
@@ -14,12 +20,15 @@ const userRouter = require('./routes/user');
 const requestRouter = require('./routes/request');
 const profileRouter = require('./routes/profile');
 const paymentRouter = require('./routes/payment');
+const chatRouter = require('./routes/chat');
+const intializeSocket = require('./utils/socket');
 
 app.use('/auth', authRouter);
 app.use('/request', requestRouter);
 app.use('/user', userRouter);
 app.use('/profile', profileRouter);
 app.use('/payment', paymentRouter);
+app.use('/chat', chatRouter);
 
 // Get user by emailId - GET /user
 app.get('/user', async (req, res) => {
@@ -91,7 +100,7 @@ app.patch('/user', async (req, res) => {
 connectDB().then(() => {
     // Our database should connected first before we start the server
     console.log('Database connected')
-    app.listen(3000, () => {
+    server.listen(3000, () => {
         console.log('Server is running on port 3000');
     });
 })
